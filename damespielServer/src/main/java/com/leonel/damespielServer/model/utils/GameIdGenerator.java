@@ -1,4 +1,4 @@
-package com.leonel.damespielServer.utils;
+package com.leonel.damespielServer.model.utils;
 
 import java.security.SecureRandom;
 

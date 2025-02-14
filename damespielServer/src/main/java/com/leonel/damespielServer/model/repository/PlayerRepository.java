@@ -1,4 +1,4 @@
-package com.leonel.damespielServer.repository;
+package com.leonel.damespielServer.model.repository;
 
 
 import com.leonel.damespielServer.model.Player;
