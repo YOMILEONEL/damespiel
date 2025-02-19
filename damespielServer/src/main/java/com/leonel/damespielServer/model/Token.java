@@ -2,14 +2,12 @@ package com.leonel.damespielServer.model;
 
 import com.leonel.damespielServer.model.enumeration.Color;
 import com.leonel.damespielServer.model.enumeration.TokenType;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@Data
 @NoArgsConstructor
 public class Token {
 
@@ -21,6 +19,12 @@ public class Token {
 
     public String toString(){
         return tokenType.toString();
+    }
+
+    public Token(TokenType  tokenType, Boolean isKing, boolean isDelete){
+        this.tokenType= tokenType;
+        this.isKing = isKing;
+        this.isDelete= isDelete;
     }
 
     /**
