@@ -212,20 +212,5 @@ public class GameServiceImpl implements GameService {
         return true;
     }
 
-    @Override
-    public GameDTO endGame(String gameId) {
-        Game game = gameRepository.findByGameId(gameId).orElseThrow(
-                () -> new RuntimeException("Game does not exist")
-        );
-        game.setGameStatus(GameStatus.END);
-        for (Player player : game.getPlayers()) {
-            player.setInGame(false);
-            playerRepository.save(player);
-        }
-        gameRepository.save(game);
-        return GameMapper.toDTO(game);
-    }
-
-
 
 }
