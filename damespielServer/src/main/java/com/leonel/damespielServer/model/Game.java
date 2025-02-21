@@ -47,4 +47,6 @@ public class Game {
 
     String board;
 
+    String lastPosition;
+
 }

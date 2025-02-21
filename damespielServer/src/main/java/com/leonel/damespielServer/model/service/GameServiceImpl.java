@@ -75,6 +75,8 @@ public class GameServiceImpl implements GameService {
                 throw new Exception("Impossible to generate new Game id");
             }
         }
+
+
         // Create a new board for the game
         Board board = new Board();
         String stringBoard = board.toString();
@@ -96,6 +98,7 @@ public class GameServiceImpl implements GameService {
                 .gameStatus(GameStatus.LOBBY)
                 .winner(Winner.TIE)
                 .players(players)
+                .lastPosition("")
                 .currentPlayerId(playerId)
                 .playerColors(playerColor)
                 .board(stringBoard)

@@ -120,5 +120,64 @@ public class Board {
         };
     }
 
+    /**
+     * Converts the board into a string representation.
+     * The string will contain space-separated cell values, with each row of the board represented on a new line.
+     *
+     * @return A string representing the board, with each cell value space-separated.
+     */
+    public String toString() {
+        StringBuilder board = new StringBuilder();
+
+        for (int i = 0; i < 8; i++) {
+            if (i != 0) {
+                board.append(" ");
+            }
+            for (int j = 0; j < 8; j++) {
+                board.append(cells[i][j].toString());
+                if (j < 7) {
+                    board.append(" ");
+                }
+            }
+        }
+        return board.toString();
+    }
+
+    /**
+     * Converts an algebraic position (e.g., "A1") to 2D array coordinates [row, column].
+     *
+     * @param position The position in algebraic notation.
+     * @return An array containing the row and column as integers.
+     * @throws IllegalArgumentException if the position is invalid (e.g., out of bounds or wrong format).
+     */
+    public int[] getCoordinatesFromPosition(String position) {
+        if (position == null || position.length() != 2) {
+            throw new IllegalArgumentException("Invalid position format: " + position);
+        }
+
+        char columnChar = position.toUpperCase().charAt(0);
+        char rowChar = position.charAt(1);
+
+        int column = columnChar - 'A';
+        int row = rowChar - '1';
+
+        if (column < 0 || column >= 8 || row < 0 || row >= 8) {
+            throw new IllegalArgumentException("Position out of bounds: " + position);
+        }
+
+        return new int[]{row, column};
+    }
+
+    String getPositionFromCoordinates(int row, int col) {
+        // Überprüfen, ob Zeile und Spalte im Bereich 0–7 liegen
+        if (row < 0 || row >= 8 || col < 0 || col >= 8) {
+            throw new IllegalArgumentException("Coordinates out of bounds: row=" + row + ", col=" + col);
+        }
+        // Position in algebraischer Notation erstellen
+        char column = (char) ('A' + col);
+        char rowChar = (char) ('1' + row);
+        return "" + column + rowChar;
+    }
+
 
 }
