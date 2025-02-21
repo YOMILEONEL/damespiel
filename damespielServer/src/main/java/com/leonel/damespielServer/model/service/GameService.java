@@ -1,4 +1,4 @@
-package com.leonel.damespielServer.service;
+package com.leonel.damespielServer.model.service;
 
 
 

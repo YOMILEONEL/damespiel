@@ -1,4 +1,4 @@
-package com.leonel.damespielServer.service;
+package com.leonel.damespielServer.model.service;
 
 import com.leonel.damespielServer.model.Board;
 import com.leonel.damespielServer.model.Game;

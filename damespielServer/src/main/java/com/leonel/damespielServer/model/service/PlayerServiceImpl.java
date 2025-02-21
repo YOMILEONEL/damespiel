@@ -1,4 +1,4 @@
-package com.leonel.damespielServer.service;
+package com.leonel.damespielServer.model.service;
 
 
 
@@ -22,13 +22,14 @@ public class PlayerServiceImpl implements PlayerService {
     @Override
     public boolean authenticatePlayer(PlayerRequest playerRequest) throws Exception {
 
-        Player player = getPlayerByName(playerRequest.name());
+        Optional<Player> optionalPlayer = playerRepository.findByName(playerRequest.name());
 
-        if(player != null) {
+        if(optionalPlayer.isPresent()) {
             throw new Exception(String.format("Player with username %s already exist", playerRequest.name()));
         }
-
-        player = PlayerMapper.RequestToDTO(playerRequest);
+        Player player = Player.builder().
+                name(playerRequest.name()).
+                password(playerRequest.password()).build();
 
         playerRepository.save(player);
         return true;

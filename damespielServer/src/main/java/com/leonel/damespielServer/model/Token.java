@@ -7,7 +7,6 @@ import lombok.*;
 @Getter
 @Setter
 @AllArgsConstructor
-@Data
 @NoArgsConstructor
 public class Token {
 
