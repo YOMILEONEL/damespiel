@@ -1,8 +1,13 @@
 package com.leonel.damespielServer.model;
 
+import com.leonel.damespielServer.model.enumeration.Color;
 import com.leonel.damespielServer.model.enumeration.TokenType;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
+
+import static com.leonel.damespielServer.model.enumeration.TokenType;
 
 
 /**
@@ -177,6 +182,51 @@ public class Board {
         char column = (char) ('A' + col);
         char rowChar = (char) ('1' + row);
         return "" + column + rowChar;
+    }
+
+    private boolean isWithinBounds(int row, int col) {
+        return row >= 0 && row < 8 && col >= 0 && col < 8;
+    }
+
+
+
+    /**
+     * Promotes a token at the given position to a King.
+     *
+     * @param position The position of the token on the board (e.g., "A1", "B2").
+     * @throws IllegalArgumentException If the position is invalid or there is no promotable token.
+     */
+    public void promoteToKing(String position) {
+        // Umwandlung der Position (z. B. "A1") in Koordinaten
+        int[] coordinates = getCoordinatesFromPosition(position);
+        int row = coordinates[0];
+        int col = coordinates[1];
+
+        // Validierung: Zelle muss ein schwarzes Feld sein
+        if (!(cells[row][col] instanceof BlackCell blackCell)) {
+            throw new IllegalArgumentException("The token at position " + position + " is not on a valid black cell.");
+        }
+
+        // Validierung: Schwarzes Feld muss ein Token enthalten
+        if (blackCell.token == null) {
+            throw new IllegalArgumentException("No token found at position " + position + " to promote.");
+        }
+
+        // Abfrage des Tokens und seiner Farbe (weiße oder schwarze Tokens)
+        Token token = blackCell.token;
+        TokenType tokenType = token.getTokenType();
+
+        // Bedingungen zum Befördern prüfen (letzte Reihe für Weiß / Schwarz)
+        if (tokenType == TokenType.TW && row == 0) { // Weiß erreicht obere Reihe
+            token.setTokenType(TokenType.KW); // Zu König befördern
+        } else if (tokenType == TokenType.TB && row == 7) { // Schwarz erreicht untere Reihe
+            token.setTokenType(TokenType.KB); // Zu König befördern
+        } else {
+            throw new IllegalArgumentException("The token at position " + position + " cannot be promoted.");
+        }
+
+        // Status aktualisieren
+        token.setKing(true); // Markiere den Token als König
     }
 
 
