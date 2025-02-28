@@ -228,6 +228,56 @@ public class Board {
         token.setKing(true); // Markiere den Token als König
     }
 
+    public void makeMove(String fromPosition, String toPosition, Color color) {
+        if (!isValidMove(fromPosition, toPosition, color)) {
+            throw new IllegalArgumentException("Ungültiger Zug von " + fromPosition + " nach " + toPosition);
+        }
+
+        int[] fromCoordinates = getCoordinatesFromPosition(fromPosition);
+        int[] toCoordinates = getCoordinatesFromPosition(toPosition);
+
+        int fromRow = fromCoordinates[0];
+        int fromCol = fromCoordinates[1];
+        int toRow = toCoordinates[0];
+        int toCol = toCoordinates[1];
+
+        BlackCell fromCell = (BlackCell) cells[fromRow][fromCol];
+        BlackCell toCell = (BlackCell) cells[toRow][toCol];
+
+        Token movingToken = fromCell.token;
+        fromCell.token = null;
+        toCell.token = movingToken;
+
+        // Überprüfen, ob der Zug ein Sprung ist
+        if (Math.abs(toRow - fromRow) == Math.abs(toCol - fromCol)) {
+            int stepRow = (toRow - fromRow) / Math.abs(toRow - fromRow);
+            int stepCol = (toCol - fromCol) / Math.abs(toCol - fromCol);
+            int middleRow = fromRow + stepRow;
+            int middleCol = fromCol + stepCol;
+
+            boolean foundOpponentToken = false;
+
+            while (middleRow != toRow && middleCol != toCol) {
+                if (cells[middleRow][middleCol] instanceof BlackCell middleCell && middleCell.token != null) {
+                    if (foundOpponentToken) {
+                        throw new IllegalArgumentException("Mehr als ein gegnerischer Token auf dem Weg");
+                    }
+                    foundOpponentToken = true;
+                    middleCell.token = null; // Entfernen des geschlagenen Tokens
+                }
+                middleRow += stepRow;
+                middleCol += stepCol;
+            }
+        }
+
+        // Token zu König befördern, wenn es die letzte Reihe erreicht
+        if (toRow == 0 && color == Color.WHITE) {
+            toCell.token.setTokenType(TokenType.KW);
+        } else if (toRow == 7 && color == Color.BLACK) {
+            toCell.token.setTokenType(TokenType.KB);
+        }
+    }
+
     public boolean isValidMove(String fromPosition, String toPosition, Color color) {
         int[] fromCoordinates = getCoordinatesFromPosition(fromPosition);
         int fromRow = fromCoordinates[0];
