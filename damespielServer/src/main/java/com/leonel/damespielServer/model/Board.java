@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import java.util.List;
 
-import static com.leonel.damespielServer.model.enumeration.TokenType;
 
 
 /**
@@ -229,5 +228,128 @@ public class Board {
         token.setKing(true); // Markiere den Token als König
     }
 
+    public boolean isValidMove(String fromPosition, String toPosition, Color color) {
+        int[] fromCoordinates = getCoordinatesFromPosition(fromPosition);
+        int fromRow = fromCoordinates[0];
+        int fromCol = fromCoordinates[1];
+
+        if (!(cells[fromRow][fromCol] instanceof BlackCell fromCell) || fromCell.token == null) {
+            return false;
+        }
+
+        Token token = fromCell.token;
+        TokenType tokenType = token.getTokenType();
+
+        if (tokenType == TokenType.KW || tokenType == TokenType.KB) {
+            return isValidMoveForKing(fromPosition, toPosition, color);
+        } else {
+            return isValidMoveForNormalToken(fromPosition, toPosition, color);
+        }
+    }
+
+    private boolean isValidMoveForKing(String fromPosition, String toPosition, Color color) {
+        int[] fromCoordinates = getCoordinatesFromPosition(fromPosition);
+        int[] toCoordinates = getCoordinatesFromPosition(toPosition);
+
+        int fromRow = fromCoordinates[0];
+        int fromCol = fromCoordinates[1];
+        int toRow = toCoordinates[0];
+        int toCol = toCoordinates[1];
+
+        if (!isWithinBounds(fromRow, fromCol) || !isWithinBounds(toRow, toCol)) {
+            return false;
+        }
+
+        if (!(cells[fromRow][fromCol] instanceof BlackCell fromCell) || fromCell.token == null) {
+            return false;
+        }
+
+        if (!(cells[toRow][toCol] instanceof BlackCell toCell) || toCell.token != null) {
+            return false;
+        }
+
+        int rowDiff = toRow - fromRow;
+        int colDiff = toCol - fromCol;
+
+        if (Math.abs(rowDiff) == Math.abs(colDiff)) {
+            int stepRow = rowDiff / Math.abs(rowDiff);
+            int stepCol = colDiff / Math.abs(colDiff);
+            int middleRow = fromRow + stepRow;
+            int middleCol = fromCol + stepCol;
+
+            boolean foundOpponentToken = false;
+
+            while (isWithinBounds(middleRow, middleCol) && (middleRow != toRow || middleCol != toCol)) {
+                if (cells[middleRow][middleCol] instanceof BlackCell middleCell && middleCell.token != null) {
+                    Color middleColor = middleCell.token.getColor();
+
+                    if (middleColor != color) {
+                        if (foundOpponentToken) {
+                            return false; // Mehr als ein gegnerischer Token auf dem Weg
+                        }
+                        foundOpponentToken = true;
+                    } else {
+                        return false; // Ein eigener Token blockiert den Weg
+                    }
+                }
+                middleRow += stepRow;
+                middleCol += stepCol;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean isValidMoveForNormalToken(String fromPosition, String toPosition, Color color) {
+        int[] fromCoordinates = getCoordinatesFromPosition(fromPosition);
+        int[] toCoordinates = getCoordinatesFromPosition(toPosition);
+
+        int fromRow = fromCoordinates[0];
+        int fromCol = fromCoordinates[1];
+        int toRow = toCoordinates[0];
+        int toCol = toCoordinates[1];
+
+        if (!isWithinBounds(fromRow, fromCol) || !isWithinBounds(toRow, toCol)) {
+            return false;
+        }
+
+        if (!(cells[fromRow][fromCol] instanceof BlackCell fromCell) || fromCell.token == null) {
+            return false;
+        }
+
+        if (!(cells[toRow][toCol] instanceof BlackCell toCell) || toCell.token != null) {
+            return false;
+        }
+
+        int rowDiff = toRow - fromRow;
+        int colDiff = toCol - fromCol;
+
+        // Normale Token dürfen nur vorwärts ziehen
+        if (Math.abs(rowDiff) == 1 && Math.abs(colDiff) == 1) {
+            if ((color == Color.WHITE && rowDiff == -1) || (color == Color.BLACK && rowDiff == 1)) {
+                return true;
+            }
+        }
+
+        // Normale Token dürfen nur vorwärts schlagen
+        if (Math.abs(rowDiff) == 2 && Math.abs(colDiff) == 2) {
+            int middleRow = fromRow + rowDiff / 2;
+            int middleCol = fromCol + colDiff / 2;
+
+            if (cells[middleRow][middleCol] instanceof BlackCell middleCell && middleCell.token != null) {
+                TokenType middleTokenType = middleCell.token.getTokenType();
+                Color middleColor = (middleTokenType == TokenType.KW || middleTokenType == TokenType.TW) ? Color.WHITE : Color.BLACK;
+
+                // Überprüfen, ob der Schlag vorwärts geht
+                if ((color == Color.WHITE && rowDiff == -2) || (color == Color.BLACK && rowDiff == 2)) {
+                    return middleColor != color;
+                }
+            }
+        }
+
+        return false;
+    }
 
 }
