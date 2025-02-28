@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/player")
 public class PlayerController {
@@ -30,4 +32,9 @@ public class PlayerController {
         return ResponseEntity.ok(playerService.loginPlayer(playerRequest));
     }
 
+    @PutMapping("/update/{id}")
+    public ResponseEntity<PlayerDto> updatePlayerName(@PathVariable Long id, @RequestBody Map<String, String> body) throws Exception {
+        String name = body.get("name");
+        return ResponseEntity.ok(playerService.updatePlayerName(id, name));
+    }
 }

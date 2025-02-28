@@ -3,6 +3,7 @@ package com.leonel.damespielServer.model.service;
 
 
 import com.leonel.damespielServer.model.Player;
+import  com.leonel.damespielServer.model.mapper.PlayerMapper;
 import com.leonel.damespielServer.model.dto.PlayerDto;
 import com.leonel.damespielServer.model.dto.PlayerRequest;
 
@@ -56,6 +57,23 @@ public class PlayerServiceImpl implements PlayerService {
 
     public boolean playerInGame(Player player){
         return player.isInGame();
+    }
+
+    @Override
+    public PlayerDto updatePlayerName(Long id, String name) throws Exception {
+        Optional<Player> optionalPlayer = playerRepository.findById(id);
+
+        if(optionalPlayer.isEmpty()){
+            throw  new Exception("Player don't exist");
+        }
+
+        Player player = optionalPlayer.get();
+
+        player.setName(name);
+
+        playerRepository.save(player);
+
+        return PlayerMapper.toDTO(player);
     }
 
     public Player getPlayerById(Long playerId) throws Exception{
