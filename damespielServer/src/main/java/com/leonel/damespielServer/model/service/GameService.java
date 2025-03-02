@@ -46,6 +46,17 @@ public interface GameService {
      */
     public boolean leaveGame(Long playerId, String gameId) throws Exception;
 
+
+    /**
+     * Wechselt den aktuell aktiven Spieler im laufenden Spiel.
+     *
+     * @param gameId          Die aktuelle Game-Id.
+     * @param currentPlayerId Die ID des aktuellen Spielers vor dem Wechsel.
+     */
+    public GameDTO switchPlayer(String gameId, Long currentPlayerId) throws Exception;
+
+
+
     /**
      * Starts the game after both players have joined.
      *
