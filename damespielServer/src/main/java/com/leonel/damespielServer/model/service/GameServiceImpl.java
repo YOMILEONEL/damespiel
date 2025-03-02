@@ -215,5 +215,38 @@ public class GameServiceImpl implements GameService {
         return true;
     }
 
+    @Override
+    public GameDTO startGame(Long playerId, String gameId) throws Exception {
+
+        //Check if the game exists
+        Optional<Game> optionalGame = gameRepository.findByGameId(gameId);
+        if (optionalGame.isEmpty()) {
+            throw new Exception("Game does not exist");
+        }
+        Game game = optionalGame.get();
+
+        //Check if the game is in the READY state
+        if (game.getGameStatus() != GameStatus.READY) {
+            throw new IllegalStateException("Game is not ready to start. Ensure both players have joined.");
+        }
+
+
+        //Initialize the game board
+        Board board = new Board();
+        game.setBoard(board.toString());
+
+        // Update the game status and set the current player
+        game.setGameStatus(GameStatus.INPROGRESS);
+        game.setCurrentPlayerId(playerId);
+
+        cache.put(gameId,game);
+
+        // Save the changes to the database
+        gameRepository.save(game);
+
+        // Return the game's details as a GameDTO
+        return GameMapper.toDTO(game);
+    }
+
 
 }

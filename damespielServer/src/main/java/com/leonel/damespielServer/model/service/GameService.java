@@ -46,5 +46,14 @@ public interface GameService {
      */
     public boolean leaveGame(Long playerId, String gameId) throws Exception;
 
+    /**
+     * Starts the game after both players have joined.
+     *
+     * @param playerId The unique ID of the player initiating the start of the game.
+     * @param gameId The unique ID of the game being started.
+     * @return A {@code GameDTO} containing the details of the game after it has been started.
+     */
+    public GameDTO startGame(Long playerId, String gameId) throws Exception;
+
 }
 
