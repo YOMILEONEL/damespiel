@@ -27,11 +27,24 @@ public class GameServerController {
     public ResponseEntity<GameDTO> joinGame(@PathVariable Long playerId, @PathVariable String gameId) throws Exception{
         return ResponseEntity.ok(gameService.joinGame(playerId, gameId));
     }
-
+    @PostMapping("/start/{gameId}/{playerId}")
+    public ResponseEntity<GameDTO> startGame(@PathVariable Long playerId, @PathVariable String gameId) throws Exception {
+        return ResponseEntity.ok(gameService.startGame(playerId, gameId));
+    }
 
     @PostMapping("/leave/{gameId}/{playerId}")
     public ResponseEntity<Boolean> leaveGame(@PathVariable Long playerId, @PathVariable String gameId) throws Exception {
         return ResponseEntity.ok(gameService.leaveGame(playerId, gameId));
+    }
+
+
+
+
+
+
+    @PostMapping("/switchPlayer/{gameId}/{currentPlayerId}")
+    public ResponseEntity<GameDTO> switchPlayer(@PathVariable String gameId, @PathVariable Long currentPlayerId) throws Exception{
+        return ResponseEntity.ok(gameService.switchPlayer(gameId, currentPlayerId));
     }
 
 

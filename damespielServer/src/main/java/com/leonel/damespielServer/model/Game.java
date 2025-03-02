@@ -5,10 +5,7 @@ import com.leonel.damespielServer.model.enumeration.Color;
 import com.leonel.damespielServer.model.enumeration.GameStatus;
 import com.leonel.damespielServer.model.enumeration.Winner;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +15,8 @@ import java.util.Map;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Game {
 
     @Id
@@ -52,4 +51,7 @@ public class Game {
     boolean hasCaptured;
 
 
+    public boolean getHasCaptured() {
+        return hasCaptured;
+    }
 }
