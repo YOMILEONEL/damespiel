@@ -402,4 +402,18 @@ public class Board {
         return false;
     }
 
+    public int getEnemyToken(Color color){
+        int anzahl=0;
+        for(int i=0; i<8; i++){
+            for(int j=0; j<8; j++){
+                if(getCells()[i][j] instanceof BlackCell blackCell && blackCell.token!=null){
+                    if(color == blackCell.token.getColor()){
+                        anzahl+=1;
+                    }
+                }
+            }
+        }
+        return anzahl;
+    }
+
 }
