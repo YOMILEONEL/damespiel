@@ -2,9 +2,11 @@ package com.leonel.damespielServer.model;
 
 import com.leonel.damespielServer.model.enumeration.Color;
 import com.leonel.damespielServer.model.enumeration.TokenType;
+import com.leonel.damespielServer.model.enumeration.Winner;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -414,6 +416,131 @@ public class Board {
             }
         }
         return anzahl;
+    }
+
+    public Winner determineWinner() {
+        boolean whiteHasMoves = false;
+        boolean blackHasMoves = false;
+        boolean whiteHasTokens = false;
+        boolean blackHasTokens = false;
+
+        for (int row = 0; row < 8; row++) {
+            for (int col = 0; col < 8; col++) {
+                if (getCells()[row][col] instanceof BlackCell blackCell && blackCell.token != null) {
+                    Token token = blackCell.token;
+                    Color tokenColor = token.getColor();
+
+                    if (tokenColor == Color.WHITE) {
+                        whiteHasTokens = true;
+                        if (!whiteHasMoves) {
+                            whiteHasMoves = !getPossibleMoves(getPositionFromCoordinates(row, col), Color.WHITE).isEmpty();
+                        }
+                    } else if (tokenColor == Color.BLACK) {
+                        blackHasTokens = true;
+                        if (!blackHasMoves) {
+                            blackHasMoves = !getPossibleMoves(getPositionFromCoordinates(row, col), Color.BLACK).isEmpty();
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!whiteHasTokens) {
+            return Winner.BLACK;
+        } else if (!blackHasTokens) {
+            return Winner.WHITE;
+        } else if (!whiteHasMoves) {
+            return Winner.BLACK;
+        } else if (!blackHasMoves) {
+            return Winner.WHITE;
+        }
+
+        return Winner.TIE;
+    }
+
+    public List<String> getPossibleMoves(String position, Color color) {
+        List<String> possibleMoves = new ArrayList<>();
+        int[] coordinates = getCoordinatesFromPosition(position);
+        int row = coordinates[0];
+        int col = coordinates[1];
+
+
+
+        System.out.println("Debugging getPossibleMoves:");
+        System.out.println("Input position: " + position + ", color: " + color);
+        System.out.println("Coordinates: row = " + row + ", col = " + col);
+
+        if (cells[row][col] instanceof BlackCell blackCell) {
+            System.out.println("Cell at position is a BlackCell.");
+            if (blackCell.token != null) {
+                Token token = blackCell.token;
+                TokenType tokenType = token.getTokenType();
+                System.out.println("Token found: " + tokenType);
+
+                int[][] directions;
+                if (tokenType == TokenType.KW || tokenType == TokenType.KB) { // King piece
+                    directions = new int[][]{{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
+                    System.out.println("Token is a King. Directions: " + directions.length);
+                } else if (color == Color.WHITE) { // Normal white piece
+                    directions = new int[][]{{-1, -1}, {-1, 1}};
+                    System.out.println("Token is a normal white piece. Directions: " + directions.length);
+                } else { // Normal black piece
+                    directions = new int[][]{{1, -1}, {1, 1}};
+                    System.out.println("Token is a normal black piece. Directions: " + directions.length);
+                }
+
+                for (int[] direction : directions) {
+                    int newRow = row + direction[0];
+                    int newCol = col + direction[1];
+                    System.out.println("Checking direction: (" + direction[0] + ", " + direction[1] + ")");
+                    System.out.println("New coordinates: row = " + newRow + ", col = " + newCol);
+
+                    if (isWithinBounds(newRow, newCol) && cells[newRow][newCol] instanceof BlackCell targetCell) {
+                        System.out.println("Target cell is within bounds and is a BlackCell.");
+                        if (targetCell.token == null) {
+                            // 1. Neues hinzugefügt: Normales Ziehen erlauben, wenn Ziel leer
+                            System.out.println("Target cell is empty. Adding move: " +
+                                    getPositionFromCoordinates(newRow, newCol));
+                            possibleMoves.add(getPositionFromCoordinates(newRow, newCol));
+                        } else {
+                            System.out.println("Target cell has a token.");
+                            Color color1 = targetCell.token.getColor();
+
+                            System.out.println("Target cell token color: " + color1);
+
+                            if (color1 != color) { // Jump over opponent
+                                int jumpRow = newRow + direction[0];
+                                int jumpCol = newCol + direction[1];
+                                System.out.println("Checking jump move. Jump coordinates: row = " + jumpRow + ", col = " + jumpCol);
+
+                                if (isWithinBounds(jumpRow, jumpCol) && cells[jumpRow][jumpCol] instanceof BlackCell jumpCell) {
+                                    if (jumpCell.token == null) {
+                                        System.out.println("Jump move valid. Adding position: " +
+                                                getPositionFromCoordinates(jumpRow, jumpCol));
+                                        possibleMoves.add(getPositionFromCoordinates(jumpRow, jumpCol));
+                                    } else {
+                                        System.err.println("Jump cell is not empty. Cannot complete jump move.");
+                                    }
+                                } else {
+                                    System.err.println("Jump cell is out of bounds or not a BlackCell.");
+                                }
+                            } else {
+                                System.err.println("Target token color matches player's color. Cannot jump.");
+                            }
+                        }
+                    } else {
+                        System.err.println("Target cell is out of bounds or not a BlackCell.");
+                    }
+                }
+            } else {
+                System.err.println("No token found at the starting position.");
+            }
+        } else {
+            System.err.println("Starting cell is not a BlackCell.");
+        }
+
+        System.out.println("Possible moves: " + possibleMoves);
+        return possibleMoves;
     }
 
 }
