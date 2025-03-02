@@ -49,4 +49,7 @@ public class Game {
 
     String lastPosition;
 
+    boolean hasCaptured;
+
+
 }

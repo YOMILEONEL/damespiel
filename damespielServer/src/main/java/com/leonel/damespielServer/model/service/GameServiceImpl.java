@@ -216,6 +216,36 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public GameDTO switchPlayer(String gameId, Long currentPlayerId) throws Exception {
+        Game game = gameRepository.findByGameId(gameId).orElseThrow(
+                () -> new RuntimeException("Game does not exist")
+        );
+        // Liste der Spieler im Spiel (sollte genau 2 sein)
+        List<Player> players = game.getPlayers();
+
+        if (players.size() != 2) {
+            throw new IllegalStateException("Unable to switch player: invalid number of players in game.");
+        }
+        if (!(Objects.equals(game.getCurrentPlayerId(), currentPlayerId))) {
+            throw new Exception("You are not the currentPlayer");
+        }
+
+        // Aktuell aktiven Spieler identifizieren und auf den nächsten wechseln
+        for (Player player : players) {
+            if (!player.getId().equals(currentPlayerId)) {
+                game.setHasCaptured(false);
+                game.setLastPosition("");
+                game.setCurrentPlayerId(player.getId());
+                gameRepository.save(game);// Speichern des Spiels nach dem Wechsel des Spielers
+                cache.put(gameId,game);
+                System.out.println("Switched player to: " + player.getId());
+                return GameMapper.toDTO(game);
+            }
+        }
+        throw new IllegalStateException("Unable to switch player: current player not found in game.");
+    }
+
+    @Override
     public GameDTO startGame(Long playerId, String gameId) throws Exception {
 
         //Check if the game exists
