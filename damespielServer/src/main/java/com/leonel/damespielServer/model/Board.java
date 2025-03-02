@@ -543,4 +543,40 @@ public class Board {
         return possibleMoves;
     }
 
+    public boolean isGameOver() {
+        boolean hasWhitePieces = false, hasBlackPieces = false;
+        boolean hasWhiteMoves = false, hasBlackMoves = false;
+
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (cells[i][j] instanceof BlackCell blackCell && blackCell.token != null) {
+                    // Token-Typ und Farbe ermitteln
+                    TokenType tokenType = blackCell.token.getTokenType();
+                    boolean isWhite = (tokenType == TokenType.KW || tokenType == TokenType.TW);
+
+                    if (isWhite) {
+                        hasWhitePieces = true;
+                    } else {
+                        hasBlackPieces = true;
+                    }
+
+                    // Nur nach möglichen Zügen suchen, wenn noch keine gefunden wurden
+                    if ((isWhite && !hasWhiteMoves) || (!isWhite && !hasBlackMoves)) {
+                        List<String> possibleMoves = getPossibleMoves(getPositionFromCoordinates(i, j), isWhite ? Color.WHITE : Color.BLACK);
+                        if (!possibleMoves.isEmpty()) {
+                            if (isWhite) {
+                                hasWhiteMoves = true;
+                            } else {
+                                hasBlackMoves = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Spiel ist vorbei, wenn entweder keine Figuren oder keine Züge mehr für eine Seite verfügbar sind
+        return !hasWhitePieces || !hasBlackPieces || !hasWhiteMoves || !hasBlackMoves;
+    }
+
 }
