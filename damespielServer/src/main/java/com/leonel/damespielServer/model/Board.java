@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.leonel.damespielServer.model.enumeration.TokenType.*;
 
 
 /**
@@ -44,7 +45,7 @@ public class Board {
                     if (i < 3) { // Obere schwarze (schwarze Tokens - TB)
                         blackCell.token = new Token(TokenType.TB, false, false);
                     } else if (i > 4) { // Untere schwarze (weiße Tokens - TW)
-                        blackCell.token = new Token(TokenType.TW, false, false);
+                        blackCell.token = new Token(TW, false, false);
                     }
 
                     cells[i][j] = blackCell;
@@ -105,7 +106,7 @@ public class Board {
         // Switch-Logik zur Erstellung der entsprechenden Zelltypen
         return switch (value) {
             case "TW" -> { // Weißer Token
-                blackCell.token = new Token(TokenType.TW, false, false);
+                blackCell.token = new Token(TW, false, false);
                 yield blackCell;
             }
             case "TB" -> { // Schwarzer Token
@@ -113,11 +114,11 @@ public class Board {
                 yield blackCell;
             }
             case "KW" -> { // Weißer König
-                blackCell.token = new Token(TokenType.KW, true, false);
+                blackCell.token = new Token(KW, true, false);
                 yield blackCell;
             }
             case "KB" -> { // Schwarzer König
-                blackCell.token = new Token(TokenType.KB, true, false);
+                blackCell.token = new Token(KB, true, false);
                 yield blackCell;
             }
             case "BC" -> blackCell; // Leeres schwarzes Feld
@@ -218,10 +219,10 @@ public class Board {
         TokenType tokenType = token.getTokenType();
 
         // Bedingungen zum Befördern prüfen (letzte Reihe für Weiß / Schwarz)
-        if (tokenType == TokenType.TW && row == 0) { // Weiß erreicht obere Reihe
-            token.setTokenType(TokenType.KW); // Zu König befördern
+        if (tokenType == TW && row == 0) { // Weiß erreicht obere Reihe
+            token.setTokenType(KW); // Zu König befördern
         } else if (tokenType == TokenType.TB && row == 7) { // Schwarz erreicht untere Reihe
-            token.setTokenType(TokenType.KB); // Zu König befördern
+            token.setTokenType(KB); // Zu König befördern
         } else {
             throw new IllegalArgumentException("The token at position " + position + " cannot be promoted.");
         }
@@ -274,9 +275,9 @@ public class Board {
 
         // Token zu König befördern, wenn es die letzte Reihe erreicht
         if (toRow == 0 && color == Color.WHITE) {
-            toCell.token.setTokenType(TokenType.KW);
+            toCell.token.setTokenType(KW);
         } else if (toRow == 7 && color == Color.BLACK) {
-            toCell.token.setTokenType(TokenType.KB);
+            toCell.token.setTokenType(KB);
         }
     }
 
@@ -292,7 +293,7 @@ public class Board {
         Token token = fromCell.token;
         TokenType tokenType = token.getTokenType();
 
-        if (tokenType == TokenType.KW || tokenType == TokenType.KB) {
+        if (tokenType == KW || tokenType == KB) {
             return isValidMoveForKing(fromPosition, toPosition, color);
         } else {
             return isValidMoveForNormalToken(fromPosition, toPosition, color);
@@ -392,7 +393,7 @@ public class Board {
 
             if (cells[middleRow][middleCol] instanceof BlackCell middleCell && middleCell.token != null) {
                 TokenType middleTokenType = middleCell.token.getTokenType();
-                Color middleColor = (middleTokenType == TokenType.KW || middleTokenType == TokenType.TW) ? Color.WHITE : Color.BLACK;
+                Color middleColor = (middleTokenType == KW || middleTokenType == TW) ? Color.WHITE : Color.BLACK;
 
                 // Überprüfen, ob der Schlag vorwärts geht
                 if ((color == Color.WHITE && rowDiff == -2) || (color == Color.BLACK && rowDiff == 2)) {
@@ -478,7 +479,7 @@ public class Board {
                 System.out.println("Token found: " + tokenType);
 
                 int[][] directions;
-                if (tokenType == TokenType.KW || tokenType == TokenType.KB) { // King piece
+                if (tokenType == KW || tokenType == KB) { // King piece
                     directions = new int[][]{{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
                     System.out.println("Token is a King. Directions: " + directions.length);
                 } else if (color == Color.WHITE) { // Normal white piece
@@ -552,7 +553,7 @@ public class Board {
                 if (cells[i][j] instanceof BlackCell blackCell && blackCell.token != null) {
                     // Token-Typ und Farbe ermitteln
                     TokenType tokenType = blackCell.token.getTokenType();
-                    boolean isWhite = (tokenType == TokenType.KW || tokenType == TokenType.TW);
+                    boolean isWhite = (tokenType == KW || tokenType == TW);
 
                     if (isWhite) {
                         hasWhitePieces = true;
@@ -578,5 +579,12 @@ public class Board {
         // Spiel ist vorbei, wenn entweder keine Figuren oder keine Züge mehr für eine Seite verfügbar sind
         return !hasWhitePieces || !hasBlackPieces || !hasWhiteMoves || !hasBlackMoves;
     }
+
+
+
+
+
+
+
 
 }

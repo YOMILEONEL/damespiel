@@ -37,10 +37,13 @@ public class GameServerController {
         return ResponseEntity.ok(gameService.leaveGame(playerId, gameId));
     }
 
-
-
-
-
+    @PostMapping("/move/{gameId}/{playerId}/{fromPosition}/{toPosition}")
+    public ResponseEntity<GameDTO> makeMove(@PathVariable String gameId,
+                                            @PathVariable Long playerId,
+                                            @PathVariable String fromPosition,
+                                            @PathVariable String toPosition) throws Exception {
+        return ResponseEntity.ok(gameService.makeMove(gameId, playerId, fromPosition, toPosition));
+    }
 
     @PostMapping("/switchPlayer/{gameId}/{currentPlayerId}")
     public ResponseEntity<GameDTO> switchPlayer(@PathVariable String gameId, @PathVariable Long currentPlayerId) throws Exception{

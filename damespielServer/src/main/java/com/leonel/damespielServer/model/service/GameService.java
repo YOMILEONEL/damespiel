@@ -66,5 +66,19 @@ public interface GameService {
      */
     public GameDTO startGame(Long playerId, String gameId) throws Exception;
 
+
+    /**
+     * Führt einen Zug aus, falls er gültig ist, und aktualisiert den Spielfeldstatus.
+     *
+     * @param gameId Die eindeutige ID des Spiels.
+     * @param playerId Die eindeutige ID des Spielers.
+     * @param fromPosition Die Startposition des Zugs (z. B. "A1").
+     * @param toPosition Die Zielposition des Zugs (z. B. "B2").
+     * @return Ein {@code GameDTO}, das den aktualisierten Status des Spiels enthält.
+     * @throws Exception Wenn der Zug ungültig ist oder ein anderer Fehler auftritt.
+     */
+    public GameDTO makeMove(String gameId, Long playerId, String fromPosition, String toPosition) throws Exception;
+
+
 }
 

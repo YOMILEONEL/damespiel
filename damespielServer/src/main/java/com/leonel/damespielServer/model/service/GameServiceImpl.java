@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static com.leonel.damespielServer.model.Board.mapStringToBoard;
 
 
 /**
@@ -275,6 +276,77 @@ public class GameServiceImpl implements GameService {
         gameRepository.save(game);
 
         // Return the game's details as a GameDTO
+        return GameMapper.toDTO(game);
+    }
+
+    @Override
+    public GameDTO makeMove(String gameId, Long playerId, String fromPosition, String toPosition) throws Exception {
+        Game game = gameRepository.findByGameId(gameId).orElseThrow(
+                () -> new RuntimeException("Game does not exist")
+        );
+
+        if (!game.getCurrentPlayerId().equals(playerId)) {
+            throw new Exception("Not the current player's turn.");
+        }
+
+
+        Board board = mapStringToBoard(game.getBoard());
+
+
+        Color color = game.getPlayerColors().get(playerId);
+
+        int beforCount =0;
+        int nextCount =0;
+
+        List<Player> players = game.getPlayers();
+        for (Player player : players) {
+            if (!player.getId().equals(playerId)) {
+                beforCount = board.getEnemyToken(game.getPlayerColors().get(player.getId()));
+            }
+        }
+
+
+        try {
+            if(game.getLastPosition().isEmpty()){
+                board.makeMove(fromPosition, toPosition, color);
+                game.setLastPosition(toPosition);
+                for (Player player : players) {
+                    if (!player.getId().equals(playerId)) {
+                        nextCount = board.getEnemyToken(game.getPlayerColors().get(player.getId()));
+                    }
+                }
+                game.setHasCaptured(nextCount==beforCount-1);
+            }else{
+                if(game.getLastPosition().equals(fromPosition) && game.getHasCaptured()){
+
+                    board.makeMove(fromPosition, toPosition, color);
+                    for (Player player : players) {
+                        if (!player.getId().equals(playerId)) {
+                            nextCount = board.getEnemyToken(game.getPlayerColors().get(player.getId()));                    }
+                    }
+
+                    game.setLastPosition(toPosition);
+                    game.setHasCaptured(nextCount==beforCount-1);
+
+                }
+            }
+
+        } catch (IllegalStateException e) {
+            game.setBoard(board.toString());
+            gameRepository.save(game);
+            throw new Exception(e.getMessage());
+        }
+
+        // Board speichern
+        game.setBoard(board.toString());
+
+        if(board.isGameOver()){
+            game.setGameStatus(GameStatus.END);
+            game.setWinner(board.determineWinner());
+        }
+
+        gameRepository.save(game);
+        cache.put(gameId, game);
         return GameMapper.toDTO(game);
     }
 
