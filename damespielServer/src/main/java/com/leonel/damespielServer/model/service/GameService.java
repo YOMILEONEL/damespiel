@@ -79,6 +79,14 @@ public interface GameService {
      */
     public GameDTO makeMove(String gameId, Long playerId, String fromPosition, String toPosition) throws Exception;
 
+    /**
+     * Retrieves the current status of a specific game.
+     *
+     * @param gameId The unique ID of the game whose status is being requested.
+     * @return A {@code GameDTO} containing the current status of the game.
+     */
+    @Async
+    CompletableFuture<GameDTO> getGameStatus(String gameId,  long playerId);
 
 }
 

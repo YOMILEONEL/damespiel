@@ -12,9 +12,11 @@ import com.leonel.damespielServer.model.repository.GameRepository;
 import com.leonel.damespielServer.model.repository.PlayerRepository;
 import com.leonel.damespielServer.model.utils.GameIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.leonel.damespielServer.model.Board.mapStringToBoard;
@@ -40,6 +42,8 @@ public class GameServiceImpl implements GameService {
 
     @Autowired
     private PlayerService playerService;
+
+    GameMapper gameMapper;
 
     /**
      * Creates a new game and assigns the given player as the first player.
@@ -348,6 +352,123 @@ public class GameServiceImpl implements GameService {
         gameRepository.save(game);
         cache.put(gameId, game);
         return GameMapper.toDTO(game);
+    }
+
+    @Override
+    @Async("taskExecutor")
+    public CompletableFuture<GameDTO> getGameStatus(String gameId, long playerId) {
+        Game game2 = cache.get(gameId);
+        if(cache.get(gameId).getGameStatus() == GameStatus.LOBBY ){
+            return CompletableFuture.supplyAsync(() -> {
+                while (true) {
+                    Game game = cache.get(gameId);
+
+                    if (game == null) {
+                        throw new RuntimeException("Game no longer exists: " + gameId);
+                    }
+
+                    if (game.getGameStatus() == GameStatus.READY) {
+                        return gameMapper.toDTO(game);
+                    }
+                    if(game.getGameStatus() == GameStatus.END){
+                        for (Player player : game.getPlayers()){
+                            player.setInGame(false);
+                            playerRepository.save(player);
+                        }
+                        gameRepository.delete(game);
+                        return gameMapper.toDTO(game);
+                    }
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("Polling interrupted", e);
+                    }
+                }
+            });
+        }else if(cache.get(gameId).getGameStatus() == GameStatus.READY) {
+            return CompletableFuture.supplyAsync(() -> {
+
+                while (true) {
+                    Game game = cache.get(gameId);
+
+                    if (game == null) {
+                        throw new RuntimeException("Game no longer exists: " + gameId);
+                    }
+                    if(game.getPlayers().size()>1 ){
+                        if(game.getGameStatus() == GameStatus.INPROGRESS){
+                            return gameMapper.toDTO(game);
+                        }
+                    }
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("Polling interrupted", e);
+                    }
+                }
+            });
+        }else if(cache.get(gameId).getGameStatus() == GameStatus.INPROGRESS){
+            return CompletableFuture.supplyAsync(() -> {
+                long startTime = System.currentTimeMillis();
+                long timeout = 30_0000;
+
+                while (true) {
+                    Game game = cache.get(gameId);
+
+                    if (game == null) {
+                        throw new RuntimeException("Game no longer exists: " + gameId);
+                    }
+
+                    if(game.getPlayers().size()>1 ){
+                        if(game.getGameStatus() == GameStatus.INPROGRESS){
+                            if(!Objects.equals(game.getCurrentPlayerId(), game2.getCurrentPlayerId())){
+                                return gameMapper.toDTO(game);
+                            }
+                            if(!Objects.equals(game2.getBoard(), game.getBoard())){
+                                return gameMapper.toDTO(game);
+                            }
+                        }
+                    }
+                    if(game.getGameStatus() == GameStatus.END){
+                        return gameMapper.toDTO(game);
+                    }
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("Polling interrupted", e);
+                    }
+                }
+            });
+        }else {
+            return CompletableFuture.supplyAsync(() -> {
+
+
+                while (true) {
+                    Game game = cache.get(gameId);
+
+                    if (game == null) {
+                        throw new RuntimeException("Game no longer exists: " + gameId);
+                    }
+                    if(game.getGameStatus()== GameStatus.END ){
+                        return GameMapper.toDTO(game);
+                    }
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("Polling interrupted", e);
+                    }
+                }
+
+            });
+        }
+
     }
 
 
